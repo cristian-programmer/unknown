@@ -1,2 +1,2 @@
 # unknown
-a operative system by hobby n.n
+a operating system by hobby n.n
