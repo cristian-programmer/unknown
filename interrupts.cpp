@@ -20,7 +20,11 @@ void InterruptManager::SetInterruptDescriptorTableEntry(
 }
 
 
-InterruptManager::InterruptManager(GlobalDescriptorTable* gdt){
+InterruptManager::InterruptManager(GlobalDescriptorTable* gdt)
+: picMasterCommand(0x20),
+  picMasterData(0x21),
+  picSlaveCommand(0xA0),
+  picSlaveData(0xA1){
     uint32_t CodeSegment = gdt->CodeSegmentSelector();
     const uint8_t IDT_INTERRUPT_GATE = 0xE;
     for(uint16_t i=0; i < 256; i++){
@@ -28,6 +32,21 @@ InterruptManager::InterruptManager(GlobalDescriptorTable* gdt){
     }
     SetInterruptDescriptorTableEntry(0x20, CodeSegment, &HandleInterruptRequest0x00, 0, IDT_INTERRUPT_GATE);
     SetInterruptDescriptorTableEntry(0x21, CodeSegment, &HandleInterruptRequest0x01, 0, IDT_INTERRUPT_GATE);
+
+    picMasterCommand.Write(0x11);
+    picSlaveCommand.Write(0x11);
+
+    picMasterData.Write(0x21);
+    picSlaveData.Write(0x28);
+
+    picMasterData.Write(0x04);
+    picSlaveData.Write(0x02);
+
+    picMasterData.Write(0x01);
+    picSlaveData.Write(0x01);
+
+    picMasterData.Write(0x00);
+    picSlaveData.Write(0x00);
 
     interruptDescriptorTablePointer idt;
     idt.size = 256 * sizeof(GateDescriptor) -1;
